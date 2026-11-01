@@ -71,6 +71,15 @@ it('describes each error group', function () {
     ]);
 });
 
+it('returns frames in the same shape whatever order the database keeps their keys in', function () {
+    // MySQL's JSON column sorts object keys by length, so it returns in_app before function.
+    insertError(['frames' => '[{"file": "app/Thrower.php", "line": 12, "in_app": true, "function": "App\\\\Thrower->run"}]']);
+
+    readAgent()->assertJsonPath('errors.0.frames', [
+        ['file' => 'app/Thrower.php', 'line' => 12, 'function' => 'App\Thrower->run', 'in_app' => true],
+    ]);
+});
+
 it('returns errors seen since a time, oldest first, in pages', function () {
     $start = now()->subDay()->startOfMinute();
 

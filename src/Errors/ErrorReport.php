@@ -161,8 +161,9 @@ final readonly class ErrorReport
     }
 
     /**
-     * PHP 8.4 names closures "{closure:Class::method():12}"; the line would split one
-     * error into many, so every closure is just "{closure}".
+     * PHP 8.4 names closures "{closure:Class::method():12}" and older versions
+     * "Namespace\{closure}". The line would split one error into many and the namespace
+     * would make PHP versions disagree, so every closure is just "{closure}".
      *
      * @param  array{function: string, class?: class-string, type?: '->'|'::'}|null  $running
      */
@@ -172,7 +173,7 @@ final readonly class ErrorReport
             return '{main}';
         }
 
-        $function = str_starts_with($running['function'], '{closure') ? '{closure}' : $running['function'];
+        $function = str_contains($running['function'], '{closure') ? '{closure}' : $running['function'];
 
         return isset($running['class'])
             ? self::className($running['class']).($running['type'] ?? '::').$function

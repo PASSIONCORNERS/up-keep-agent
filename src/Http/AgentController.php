@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Passioncorners\UpKeepAgent\AgentDatabase;
+use Passioncorners\UpKeepAgent\Errors\ErrorReport;
 use Passioncorners\UpKeepAgent\Health\HealthReadings;
 use Passioncorners\UpKeepAgent\Server\ServerReadings;
 use Passioncorners\UpKeepAgent\Server\StackReadings;
@@ -19,7 +20,9 @@ use Throwable;
  * It answers even when the database is down: that part of the page says so, and the
  * readings that need the database are null.
  *
- * @phpstan-type ErrorGroup array{fingerprint: string, level: string, class: string, message: string, file: string, line: int|null, method: string|null, url: string|null, frames: list<mixed>, count: int, first_seen_at: string, last_seen_at: string}
+ * @phpstan-import-type Frame from ErrorReport
+ *
+ * @phpstan-type ErrorGroup array{fingerprint: string, level: string, class: string, message: string, file: string, line: int|null, method: string|null, url: string|null, frames: list<Frame>, count: int, first_seen_at: string, last_seen_at: string}
  */
 class AgentController
 {
@@ -111,8 +114,6 @@ class AgentController
      */
     private function errorGroup(stdClass $row): array
     {
-        $frames = json_decode((string) $row->frames, true);
-
         return [
             'fingerprint' => (string) $row->fingerprint,
             'level' => (string) $row->level,
@@ -122,11 +123,36 @@ class AgentController
             'line' => $row->line === null ? null : (int) $row->line,
             'method' => $row->method === null ? null : (string) $row->method,
             'url' => $row->url === null ? null : (string) $row->url,
-            'frames' => is_array($frames) ? array_values($frames) : [],
+            'frames' => $this->frames($row->frames),
             'count' => (int) $row->occurrences,
             'first_seen_at' => $this->iso($row->first_seen_at),
             'last_seen_at' => $this->iso($row->last_seen_at),
         ];
+    }
+
+    /**
+     * MySQL's JSON column re-sorts object keys, so each frame is rebuilt in the order the
+     * recorder wrote it, and the page reads the same on every database.
+     *
+     * @return list<Frame>
+     */
+    private function frames(mixed $stored): array
+    {
+        $decoded = json_decode((string) $stored, true);
+        $frames = [];
+
+        foreach (is_array($decoded) ? $decoded : [] as $frame) {
+            if (is_array($frame)) {
+                $frames[] = [
+                    'file' => (string) ($frame['file'] ?? ''),
+                    'line' => (int) ($frame['line'] ?? 0),
+                    'function' => (string) ($frame['function'] ?? ''),
+                    'in_app' => (bool) ($frame['in_app'] ?? false),
+                ];
+            }
+        }
+
+        return $frames;
     }
 
     private function iso(mixed $stored): string
