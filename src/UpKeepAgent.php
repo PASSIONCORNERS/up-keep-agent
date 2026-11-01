@@ -8,7 +8,7 @@ namespace Passioncorners\UpKeepAgent;
  */
 final class UpKeepAgent
 {
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.0.1';
 
     /** The shape of the agent page. up-keep checks it and ignores fields it doesn't know. */
     public const CONTRACT = 1;
