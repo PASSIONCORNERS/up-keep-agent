@@ -1,0 +1,71 @@
+{
+    "name": "passioncorners/up-keep-agent",
+    "description": "Reports a Laravel app's errors, health and server stats to up-keep on one secret-protected page.",
+    "type": "library",
+    "license": "proprietary",
+    "keywords": ["laravel", "monitoring", "uptime", "errors"],
+    "require": {
+        "php": "^8.2",
+        "illuminate/console": "^12.0|^13.0",
+        "illuminate/contracts": "^12.0|^13.0",
+        "illuminate/database": "^12.0|^13.0",
+        "illuminate/http": "^12.0|^13.0",
+        "illuminate/log": "^12.0|^13.0",
+        "illuminate/queue": "^12.0|^13.0",
+        "illuminate/redis": "^12.0|^13.0",
+        "illuminate/routing": "^12.0|^13.0",
+        "illuminate/support": "^12.0|^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.9",
+        "laravel/pint": "^1.27",
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^3.8|^4.4",
+        "pestphp/pest-plugin-laravel": "^3.2|^4.1",
+        "projektgopher/whisky": "^0.7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Passioncorners\\UpKeepAgent\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Passioncorners\\UpKeepAgent\\Tests\\": "tests/"
+        },
+        "classmap": [
+            "tests/Fixtures"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Passioncorners\\UpKeepAgent\\UpKeepAgentServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "lint": "pint",
+        "lint:check": "pint --test",
+        "lint:diff": "pint --diff=main",
+        "stan": "phpstan analyse --memory-limit=1G",
+        "test": [
+            "@lint:check",
+            "@stan",
+            "pest"
+        ],
+        "ci:check": [
+            "@lint:check",
+            "@stan",
+            "pest"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

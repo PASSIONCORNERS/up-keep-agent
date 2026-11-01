@@ -1,0 +1,6 @@
+/tests export-ignore
+/.github export-ignore
+/phpunit.xml export-ignore
+/phpstan.neon export-ignore
+/pint.json export-ignore
+/whisky.json export-ignore

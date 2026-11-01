@@ -1,0 +1,4 @@
+<?php
+
+// Stands in for the app's artisan script, which hands straight over to vendor code.
+(new Fixtures\Vendor\Library)->explode();
